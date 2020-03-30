@@ -48,16 +48,23 @@ for ($i = 0; $i < $totalBatch; $i++) {
         $inputs[] = $data[$i + $j][11];
     }
     $result = fann_run($network, $inputs);
-    if (!isset($data[$i + $j])) {
-        continue;
+    if (isset($data[$i + $j])) {
+        $content = [
+            $i + 1,
+            $data[$i + $j][2],
+            $data[$i + $j][3],
+            $data[$i + $j - 1][3] * ($result[0] + 1),
+            $data[$i + $j - 1][3] * ($result[0] + 1) * ($result[1] + 1),
+        ];
+    } else {
+        $content = [
+            $i + 1,
+            '?',
+            '?',
+            $data[$i + $j - 1][3] * ($result[0] + 1),
+            $data[$i + $j - 1][3] * ($result[0] + 1) * ($result[1] + 1),
+        ];
     }
-    $content = [
-        $i + 1,
-        $data[$i + $j][2],
-        $data[$i + $j][3],
-        $data[$i + $j - 1][3] * ($result[0] + 1),
-        $data[$i + $j - 1][3] * ($result[0] + 1) * ($result[1] + 1),
-    ];
     file_put_contents('pre.csv', implode(',', $content) . PHP_EOL, FILE_APPEND);
 }
 
