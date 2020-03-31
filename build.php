@@ -4,9 +4,9 @@ include 'autoload.php';
 
 class Config {
     public static $trainDataStartId = 2112;
-    public static $trainDataEndId = 6307;
-    public static $testDataStartId = 6308;
-    public static $testDataEndId = 6358;
+    public static $trainDataEndId = 6330;
+    public static $testDataStartId = 6331;
+    public static $testDataEndId = 6361;
     public static $data = [];
     public static $index = 0;
     public static $inputDay = 30;
