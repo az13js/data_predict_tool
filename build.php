@@ -4,9 +4,9 @@ include 'autoload.php';
 
 class Config {
     public static $trainDataStartId = 2112;
-    public static $trainDataEndId = 6330;
-    public static $testDataStartId = 6331;
-    public static $testDataEndId = 6361;
+    public static $trainDataEndId = 6332;
+    public static $testDataStartId = 6332;
+    public static $testDataEndId = 6362;
     public static $data = [];
     public static $index = 0;
     public static $inputDay = 30;
@@ -36,7 +36,6 @@ while (true) {
 }
 
 fclose($fp);
-file_put_contents('temp.txt', print_r($data, true));
 
 Config::$data = $data;
 unset($data);
@@ -46,6 +45,10 @@ $train_data = fann_create_train_from_callback(Config::$trainDataEndId - Config::
     $lastPrice = 0;
     for ($i = 0; $i < Config::$inputDay; $i++) {
         if (0 == $i) {
+            if (!isset(Config::$data[Config::$trainDataStartId + Config::$index + $i])) {
+                echo '不存在的开始数据' . PHP_EOL;
+                die();
+            }
             $lastPrice = Config::$data[Config::$trainDataStartId + Config::$index + $i][2];
         }
         $data['input'][] = Config::$data[Config::$trainDataStartId + Config::$index + $i][2] / $lastPrice - 1;
@@ -60,6 +63,10 @@ $train_data = fann_create_train_from_callback(Config::$trainDataEndId - Config::
         $data['input'][] = Config::$data[Config::$trainDataStartId + Config::$index + $i][11];
         $lastPrice = Config::$data[Config::$trainDataStartId + Config::$index + $i][3];
     }
+    if (!isset(Config::$data[Config::$trainDataStartId + Config::$index + $i])) {
+        echo '不存在的数据' . PHP_EOL;
+        die();
+    }
     $data['output'][] = Config::$data[Config::$trainDataStartId + Config::$index + $i][2] / $lastPrice - 1;
     $data['output'][] = Config::$data[Config::$trainDataStartId + Config::$index + $i][3] / Config::$data[Config::$trainDataStartId + Config::$index + $i][2] - 1;
     Config::$index++;
@@ -68,11 +75,20 @@ $train_data = fann_create_train_from_callback(Config::$trainDataEndId - Config::
 fann_save_train($train_data, 'trainData.txt');
 fann_destroy_train($train_data);
 Config::$index = 0;
-$test_data = fann_create_train_from_callback(Config::$testDataEndId - Config::$testDataStartId + 2 - Config::$window, 300, 2, function($num, $num_input, $num_output) {
+$testDataTotal = Config::$testDataEndId - Config::$testDataStartId + 2 - Config::$window;
+if ($testDataTotal <= 0) {
+    echo '测试数据数量小于等于0' . PHP_EOL;
+    die();
+}
+$test_data = fann_create_train_from_callback($testDataTotal, 300, 2, function($num, $num_input, $num_output) {
     $data = ['input' => [], 'output' => []];
     $lastPrice = 0;
     for ($i = 0; $i < Config::$inputDay; $i++) {
         if (0 == $i) {
+            if (!isset(Config::$data[Config::$testDataStartId + Config::$index + $i])) {
+                echo '不存在的开始数据' . PHP_EOL;
+                die();
+            }
             $lastPrice = Config::$data[Config::$testDataStartId + Config::$index + $i][2];
         }
         $data['input'][] = Config::$data[Config::$testDataStartId + Config::$index + $i][2] / $lastPrice - 1;
@@ -86,6 +102,10 @@ $test_data = fann_create_train_from_callback(Config::$testDataEndId - Config::$t
         $data['input'][] = Config::$data[Config::$testDataStartId + Config::$index + $i][10];
         $data['input'][] = Config::$data[Config::$testDataStartId + Config::$index + $i][11];
         $lastPrice = Config::$data[Config::$testDataStartId + Config::$index + $i][3];
+    }
+    if (!isset(Config::$data[Config::$testDataStartId + Config::$index + $i])) {
+        echo '不存在的数据' . PHP_EOL;
+        die();
     }
     $data['output'][] = Config::$data[Config::$testDataStartId + Config::$index + $i][2] / $lastPrice - 1;
     $data['output'][] = Config::$data[Config::$testDataStartId + Config::$index + $i][3] / Config::$data[Config::$testDataStartId + Config::$index + $i][2] - 1;
