@@ -2,6 +2,13 @@
 
 include 'autoload.php';
 
+$builder = new Tools\DataBuilder('data.csv');
+var_dump($builder);
+die();
+$builder->build('trainData.txt', 1, 5, 2, 1, [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], [5]);
+
+die();
+
 class Config {
     public static $trainDataStartId = 2112;
     public static $trainDataEndId = 6368;

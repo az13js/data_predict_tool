@@ -6,19 +6,11 @@ use \Exception;
 /**
  * 数据预处理
  */
-class DataPreProcess
+class DataPreProcess extends DataReader
 {
-    /** @var array */
-    protected $data;
-
     public function __construct(string $fileName)
     {
-        $fp = fopen($fileName, 'rb');
-        if (false === $fp) {
-            throw new Exception('打开文件失败！，文件名称：' . $fileName);
-        }
-        $this->data = $this->getUsageDatas($fp);
-        fclose($fp);
+        parent::__construct($fileName);
     }
 
     public function find(int $column, string $content)
@@ -86,29 +78,7 @@ class DataPreProcess
         return count($this->data[1], COUNT_NORMAL);
     }
 
-    private function getUsageDatas($fp): array
-    {
-        $index = 1;
-        $data = [];
-        $row = fgetcsv($fp); // header
-        while (true) {
-            $row = fgetcsv($fp);
-            if (false === $row) {
-                Log::record('Exit DataPreProcess::getUsageDatas(), index=' . $index);
-                Log::record('Last index=' . ($index - 1));
-                Log::record('Total in csv file=' . $index);
-                break;
-            }
-            if (empty($row)) {
-                continue;
-            }
-            $this->rowChecker($row, $index);
-            $data[$index++] = $row;
-        }
-        return $data;
-    }
-
-    private function rowChecker(array $csvRow, int $index)
+    protected function rowChecker(array $csvRow, int $index)
     {
         if (count($csvRow, COUNT_NORMAL) != 12) {
             throw Exception('数据列数量不对,index=' . $index);
